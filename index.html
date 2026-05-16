@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EchoLine — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c10;--surface:#0d1318;--border:#1a2330;--accent:#00d4aa;--accent2:#0099ff;--text:#e8edf2;--muted:#5a6b7a;--error:#ff4d6a}
+body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh;display:grid;place-items:center;overflow:hidden}
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,170,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,170,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none}
+.orb-1{width:400px;height:400px;background:rgba(0,212,170,.07);top:-10%;left:-10%}
+.orb-2{width:300px;height:300px;background:rgba(0,153,255,.06);bottom:-5%;right:-5%}
+.card{position:relative;width:min(430px,95vw);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:44px 36px;box-shadow:0 32px 80px rgba(0,0,0,.6);animation:card-in .5s cubic-bezier(.22,1,.36,1)}
+@keyframes card-in{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:grid;place-items:center;font-size:17px}
+.logo-name{font-family:'DM Serif Display',serif;font-size:21px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tabs{display:flex;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:24px}
+.tab{flex:1;padding:8px;border:none;background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:13px;border-radius:7px;cursor:pointer;transition:all .2s}
+.tab.active{background:linear-gradient(135deg,rgba(0,212,170,.2),rgba(0,153,255,.15));color:var(--accent);box-shadow:0 0 0 1px rgba(0,212,170,.3)}
+.field{margin-bottom:16px}
+label{display:block;font-size:11px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+input{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Mono',monospace;font-size:14px;outline:none;transition:all .2s}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,170,.1)}
+input::placeholder{color:var(--muted)}
+.otp-row{display:flex;gap:8px}
+.otp-row input{flex:1;text-align:center;letter-spacing:6px;font-size:20px;font-weight:500}
+.send-otp-btn{flex-shrink:0;padding:11px 14px;background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);border-radius:10px;color:var(--accent);font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.send-otp-btn:hover{background:rgba(0,212,170,.2)}
+.send-otp-btn:disabled{opacity:.4;cursor:not-allowed}
+.btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;color:#040a0e;font-family:'DM Mono',monospace;font-weight:500;font-size:14px;cursor:pointer;margin-top:6px;transition:all .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,212,170,.3)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.alert{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:14px;display:none;line-height:1.5}
+.alert.error{background:rgba(255,77,106,.1);border:1px solid rgba(255,77,106,.3);color:#ff8099}
+.alert.success{background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.25);color:var(--accent)}
+.alert.show{display:block}
+.hint{text-align:center;margin-top:18px;font-size:12px;color:var(--muted)}
+.hint span{color:var(--accent);cursor:pointer}
+.strength-bar{height:3px;background:var(--border);border-radius:2px;margin-top:7px;overflow:hidden}
+.strength-fill{height:100%;border-radius:2px;transition:all .3s;width:0%}
+.strength-label{font-size:10px;color:var(--muted);margin-top:4px;text-align:right}
+.timer{font-size:11px;color:var(--muted);margin-top:5px;text-align:right}
+.step-indicator{display:flex;gap:6px;margin-bottom:22px}
+.step-dot{flex:1;height:3px;border-radius:2px;background:var(--border);transition:background .3s}
+.step-dot.done{background:var(--accent)}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="card">
+  <div class="logo"><div class="logo-icon">🎙</div><div class="logo-name">EchoLine</div></div>
+  <div class="tabs">
+    <button class="tab active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+    <button class="tab" id="tab-register" onclick="switchTab('register')">Create Account</button>
+  </div>
+  <div id="alert" class="alert"></div>
+
+  <!-- LOGIN -->
+  <div id="form-login">
+    <div class="field"><label>Email Address</label><input type="email" id="login-email" placeholder="you@example.com"/></div>
+    <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"/></div>
+    <button class="btn" id="btn-login" onclick="handleLogin()">Sign In</button>
+    <div class="hint">No account? <span onclick="switchTab('register')">Create one →</span></div>
+  </div>
+
+  <!-- REGISTER (3 steps) -->
+  <div id="form-register" style="display:none">
+    <div class="step-indicator">
+      <div class="step-dot done" id="sdot-1"></div>
+      <div class="step-dot" id="sdot-2"></div>
+      <div class="step-dot" id="sdot-3"></div>
+    </div>
+
+    <!-- Step 1: Email -->
+    <div id="reg-step-1">
+      <div class="field"><label>Email Address</label><input type="email" id="reg-email" placeholder="you@example.com"/></div>
+      <div class="otp-row">
+        <button class="send-otp-btn" id="btn-send-otp" onclick="sendOTP()">Send OTP</button>
+      </div>
+      <div class="timer" id="otp-timer" style="display:none"></div>
+      <div class="hint" style="margin-top:14px">Have an account? <span onclick="switchTab('login')">Sign in →</span></div>
+    </div>
+
+    <!-- Step 2: OTP verify -->
+    <div id="reg-step-2" style="display:none">
+      <div class="field">
+        <label>Enter 6-digit OTP sent to <span id="otp-email-hint" style="color:var(--accent)"></span></label>
+        <div class="otp-row"><input type="text" id="reg-otp" placeholder="000000" maxlength="6" inputmode="numeric" style="letter-spacing:8px;font-size:22px;text-align:center"/></div>
+      </div>
+      <button class="btn" onclick="verifyOTP()">Verify OTP</button>
+      <div class="hint" style="margin-top:12px"><span onclick="backToStep1()">← Change email</span></div>
+    </div>
+
+    <!-- Step 3: Password -->
+    <div id="reg-step-3" style="display:none">
+      <div class="field">
+        <label>Create Password</label>
+        <input type="password" id="reg-password" placeholder="Min. 6 characters" oninput="checkStrength()"/>
+        <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+        <div class="strength-label" id="strength-label"></div>
+      </div>
+      <button class="btn" id="btn-register" onclick="handleRegister()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let otpTimerInterval, verifiedEmail = null, otpSent = false;
+
+function switchTab(t) {
+  document.getElementById("form-login").style.display = t==="login"?"block":"none";
+  document.getElementById("form-register").style.display = t==="register"?"block":"none";
+  document.getElementById("tab-login").className = "tab"+(t==="login"?" active":"");
+  document.getElementById("tab-register").className = "tab"+(t==="register"?" active":"");
+  clearAlert();
+}
+function showAlert(msg,type="error"){const el=document.getElementById("alert");el.textContent=msg;el.className="alert "+type+" show"}
+function clearAlert(){document.getElementById("alert").className="alert"}
+
+function setDot(n){
+  [1,2,3].forEach(i=>document.getElementById("sdot-"+i).className="step-dot"+(i<=n?" done":""));
+}
+
+function checkStrength(){
+  const pw=document.getElementById("reg-password").value;
+  let s=0;if(pw.length>=6)s++;if(pw.length>=10)s++;if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;
+  const L=[{w:"0%",c:"transparent",t:""},{w:"25%",c:"#ff4d6a",t:"Weak"},{w:"50%",c:"#ffa040",t:"Fair"},{w:"75%",c:"#ffd040",t:"Good"},{w:"100%",c:"#00d4aa",t:"Strong"}];
+  const l=L[Math.min(s,4)];
+  const f=document.getElementById("strength-fill");f.style.width=l.w;f.style.background=l.c;
+  const sl=document.getElementById("strength-label");sl.textContent=l.t;sl.style.color=l.c;
+}
+
+function startOTPTimer(secs=600){
+  clearInterval(otpTimerInterval);
+  const el=document.getElementById("otp-timer");el.style.display="block";
+  const tick=()=>{
+    if(secs<=0){clearInterval(otpTimerInterval);el.textContent="OTP expired — resend";document.getElementById("btn-send-otp").disabled=false;return}
+    const m=Math.floor(secs/60),s=secs%60;
+    el.textContent=`OTP valid for ${m}:${String(s).padStart(2,"0")}`;secs--;
+  };
+  tick();otpTimerInterval=setInterval(tick,1000);
+}
+
+async function sendOTP(){
+  clearAlert();
+  const email=document.getElementById("reg-email").value.trim();
+  if(!email)return showAlert("Enter your email first");
+  const btn=document.getElementById("btn-send-otp");btn.disabled=true;btn.textContent="Sending...";
+  try{
+    const res=await fetch("/api/send-otp",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
+    const d=await res.json();
+    if(!res.ok){btn.disabled=false;btn.textContent="Send OTP";return showAlert(d.error||"Failed to send OTP")}
+    document.getElementById("reg-step-1").style.display="none";
+    document.getElementById("reg-step-2").style.display="block";
+    document.getElementById("otp-email-hint").textContent=email;
+    setDot(2);startOTPTimer();
+    btn.textContent="Resend OTP";
+  }catch(e){btn.disabled=false;btn.textContent="Send OTP";showAlert("Connection error")}
+}
+
+function verifyOTP(){
+  clearAlert();
+  const otp=document.getElementById("reg-otp").value.trim();
+  if(otp.length!==6||!/^\d+$/.test(otp))return showAlert("Enter valid 6-digit OTP");
+  verifiedEmail=document.getElementById("reg-email").value.trim();
+  clearInterval(otpTimerInterval);
+  document.getElementById("reg-step-2").style.display="none";
+  document.getElementById("reg-step-3").style.display="block";
+  setDot(3);
+}
+
+function backToStep1(){
+  document.getElementById("reg-step-2").style.display="none";
+  document.getElementById("reg-step-1").style.display="block";
+  setDot(1);clearAlert();clearInterval(otpTimerInterval);
+  document.getElementById("otp-timer").style.display="none";
+}
+
+async function handleRegister(){
+  clearAlert();
+  const otp=document.getElementById("reg-otp").value.trim();
+  const password=document.getElementById("reg-password").value;
+  if(!verifiedEmail)return showAlert("Please verify your email first");
+  if(!password||password.length<6)return showAlert("Password must be at least 6 characters");
+  const btn=document.getElementById("btn-register");btn.disabled=true;btn.textContent="Creating...";
+  try{
+    const res=await fetch("/api/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:verifiedEmail,otp,password})});
+    const d=await res.json();
+    if(!res.ok){btn.disabled=false;btn.textContent="Create Account";return showAlert(d.error||"Registration failed")}
+    localStorage.setItem("token",d.token);localStorage.setItem("user",JSON.stringify(d.user));
+    showAlert("Account created! Loading…","success");
+    setTimeout(()=>window.location.href="/app.html",900);
+  }catch(e){btn.disabled=false;btn.textContent="Create Account";showAlert("Connection error")}
+}
+
+async function handleLogin(){
+  clearAlert();
+  const email=document.getElementById("login-email").value.trim();
+  const password=document.getElementById("login-password").value;
+  if(!email||!password)return showAlert("Fill all fields");
+  const btn=document.getElementById("btn-login");btn.disabled=true;btn.textContent="Signing in...";
+  try{
+    const res=await fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})});
+    const d=await res.json();
+    if(!res.ok){btn.disabled=false;btn.textContent="Sign In";return showAlert(d.error||"Login failed")}
+    localStorage.setItem("token",d.token);localStorage.setItem("user",JSON.stringify(d.user));
+    showAlert("Welcome back!","success");setTimeout(()=>window.location.href="/app.html",800);
+  }catch(e){btn.disabled=false;btn.textContent="Sign In";showAlert("Connection error")}
+}
+
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter")return;
+  if(document.getElementById("form-login").style.display!=="none")handleLogin();
+  else if(document.getElementById("reg-step-3").style.display!=="none")handleRegister();
+  else if(document.getElementById("reg-step-2").style.display!=="none")verifyOTP();
+});
+
+if(localStorage.getItem("token"))window.location.href="/app.html";
+</script>
+</body>
+</html>
