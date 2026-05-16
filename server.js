@@ -72,8 +72,9 @@ if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true,           // SSL — port 465
+  port: 587,
+  secure: false,           // SSL — port 465
+  requireTLS: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS   // Gmail App Password (16 chars, no spaces)
