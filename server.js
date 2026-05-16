@@ -66,26 +66,24 @@ const Friendship = mongoose.model("Friendship", FriendshipSchema);
 const Call       = mongoose.model("Call", CallSchema);
 
 // ── Email (Gmail SMTP) ─────────────────────────────────────
-if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-  console.warn("⚠ EMAIL_USER or EMAIL_PASS not set — OTP emails will fail");
+if (!process.env.BREVO_USER || !process.env.BREVO_PASS) {
+  console.warn("⚠ BREVO_USER or BREVO_PASS not set — OTP emails will fail");
 }
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: "smtp-relay.brevo.com",
   port: 587,
   secure: false,           // SSL — port 465
-  requireTLS: true,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS   // Gmail App Password (16 chars, no spaces)
-  },
-  tls: { rejectUnauthorized: false }
+    user: process.env.BREVO_USER,
+    pass: process.env.BREVO_PASS   // Gmail App Password (16 chars, no spaces)
+  }
 });
 
 // Verify email config on startup
 transporter.verify((err) => {
   if (err) console.error("✗ Email config error:", err.message);
-  else console.log("✓ Email (Gmail SMTP) ready");
+  else console.log("✓ Email (Brevo SMTP) ready");
 });
 
 async function sendOTP(email, code) {
